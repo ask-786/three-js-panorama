@@ -22,7 +22,7 @@ const PanoramaView = ({ textures }: { textures: string[] }) => {
 
   const [isDragging, setIsDragging] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const rotationSpeed = 0.005;
+  const rotationSpeed = 0.003;
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
@@ -37,12 +37,15 @@ const PanoramaView = ({ textures }: { textures: string[] }) => {
     const deltaX = e.clientX - mousePosition.x;
     const deltaY = e.clientY - mousePosition.y;
 
-    camera.rotation.y -= deltaX * rotationSpeed;
-    camera.rotation.x -= deltaY * rotationSpeed;
+    const yaw = deltaX * rotationSpeed;
+    const pitch = -deltaY * rotationSpeed;
+
+    camera.rotation.order = "YXZ";
+    camera.rotation.y += yaw;
 
     camera.rotation.x = Math.max(
       -Math.PI / 2,
-      Math.min(Math.PI / 2, camera.rotation.x),
+      Math.min(Math.PI / 2, camera.rotation.x - pitch),
     );
 
     setMousePosition({ x: e.clientX, y: e.clientY });
@@ -58,13 +61,12 @@ const PanoramaView = ({ textures }: { textures: string[] }) => {
       onPointerUp={handleMouseUp}
       onPointerMove={handleMouseMove}
     >
-      {/* Sphere for the panorama */}
       <sphereGeometry args={[500, 60, 40]} />
       <meshBasicMaterial map={texture} side={2} />
 
-      {/* Hotspots - Define clickable points */}
       <Hotspot position={[100, 0, 400]} onClick={() => changeTexture(1)} />
       <Hotspot position={[-300, 50, -200]} onClick={() => changeTexture(2)} />
+      <Hotspot position={[100, -100, 60]} onClick={() => changeTexture(0)} />
     </mesh>
   );
 };
