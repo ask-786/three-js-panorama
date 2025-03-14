@@ -1,27 +1,28 @@
-import { Canvas, useLoader, useThree } from "@react-three/fiber";
+import { Canvas, useFrame, useLoader, useThree } from "@react-three/fiber";
 import { TextureLoader, Vector3 } from "three";
 import { useState } from "react";
-
-const Hotspot = ({
-  position,
-  onClick,
-}: {
-  position: [number, number, number];
-  onClick: () => void;
-}) => (
-  <mesh position={position} onClick={onClick}>
-    <sphereGeometry args={[5, 16, 16]} /> {/* Small sphere as the hotspot */}
-    <meshBasicMaterial color="red" />
-  </mesh>
-);
+import Hotspot from "./Hotspot";
 
 const PanoramaView = ({ textures }: { textures: string[] }) => {
   const { camera } = useThree();
-  const [currentTextureIndex, setCurrentTextureIndex] = useState(0);
-  const texture = useLoader(TextureLoader, textures[currentTextureIndex]);
 
+  const [currentTextureIndex, setCurrentTextureIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [targetRotation, setTargetRotation] = useState({
+    x: camera.rotation.x,
+    y: camera.rotation.y,
+  });
+
+  const texture = useLoader(TextureLoader, textures[currentTextureIndex]);
+
+  useFrame(() => {
+    camera.rotation.order = "YXZ";
+
+    camera.rotation.x += (targetRotation.x - camera.rotation.x) * 0.1;
+    camera.rotation.y += (targetRotation.y - camera.rotation.y) * 0.1;
+  });
+
   const rotationSpeed = 0.003;
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -43,10 +44,10 @@ const PanoramaView = ({ textures }: { textures: string[] }) => {
     camera.rotation.order = "YXZ";
     camera.rotation.y += yaw;
 
-    camera.rotation.x = Math.max(
-      -Math.PI / 2,
-      Math.min(Math.PI / 2, camera.rotation.x - pitch),
-    );
+    setTargetRotation((prev) => ({
+      x: Math.max(-Math.PI / 2, Math.min(Math.PI / 2, prev.x - pitch)),
+      y: prev.y + yaw,
+    }));
 
     setMousePosition({ x: e.clientX, y: e.clientY });
   };
