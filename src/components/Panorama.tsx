@@ -94,7 +94,7 @@ const Panorama = () => {
   return (
     <div className="relative" style={{ width: "100vw", height: "100vh" }}>
       <span className="absolute z-10 top-5 left-5 text-3xl font-semibold">
-        Panorama Demo
+        Demo
       </span>
       <Canvas camera={{ position: new Vector3(0, 0, 0.1) }}>
         <pointLight position={[10, 10, 10]} />
