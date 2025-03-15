@@ -11,7 +11,7 @@ const PanoramaView = ({ textures }: { textures: string[] }) => {
   const texture = useLoader(TextureLoader, textures[currentTextureIndex]);
 
   useEffect(() => {
-    const abortController = new AbortController();
+    const controller = new AbortController();
 
     let touchStartDistance = 0;
 
@@ -34,7 +34,7 @@ const PanoramaView = ({ textures }: { textures: string[] }) => {
 
         camera.updateProjectionMatrix();
       },
-      { signal: abortController.signal },
+      { signal: controller.signal },
     );
 
     window.addEventListener(
@@ -43,7 +43,7 @@ const PanoramaView = ({ textures }: { textures: string[] }) => {
         if (event.touches.length < 2) return;
         touchStartDistance = getTouchDistance(event.touches);
       },
-      { signal: abortController.signal },
+      { signal: controller.signal },
     );
 
     window.addEventListener(
@@ -58,10 +58,10 @@ const PanoramaView = ({ textures }: { textures: string[] }) => {
         camera.updateProjectionMatrix();
         touchStartDistance = newDistance;
       },
-      { signal: abortController.signal },
+      { signal: controller.signal },
     );
 
-    return () => abortController.abort();
+    return () => controller.abort();
   }, [camera]);
 
   const changeTexture = (index: number) => {
