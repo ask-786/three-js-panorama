@@ -1,13 +1,13 @@
-import { Canvas, useLoader } from "@react-three/fiber";
-import { TextureLoader, Vector3 } from "three";
+import { Canvas } from "@react-three/fiber";
+import { BackSide, Vector3 } from "three";
 import { useState } from "react";
-import { OrbitControls } from "@react-three/drei";
+import { OrbitControls, useTexture } from "@react-three/drei";
 import Hotspot from "./Hotspot";
 
 const PanoramaView = ({ textures }: { textures: string[] }) => {
   const [currentTextureIndex, setCurrentTextureIndex] = useState(0);
 
-  const texture = useLoader(TextureLoader, textures[currentTextureIndex]);
+  const texture = useTexture(textures[currentTextureIndex]);
 
   const changeTexture = (index: number) => {
     setCurrentTextureIndex(index);
@@ -16,15 +16,13 @@ const PanoramaView = ({ textures }: { textures: string[] }) => {
   return (
     <>
       <mesh>
-        <sphereGeometry args={[500, 60, 40]} />
-        <meshBasicMaterial map={texture} side={2} />
+        <sphereGeometry args={[500, 60, 60]} />
+        <meshBasicMaterial map={texture} side={BackSide} />
       </mesh>
 
       <Hotspot position={[100, 0, 400]} onClick={() => changeTexture(1)} />
       <Hotspot position={[-300, 50, -200]} onClick={() => changeTexture(2)} />
       <Hotspot position={[100, -100, 60]} onClick={() => changeTexture(0)} />
-
-      <OrbitControls enableZoom={false} enablePan={false} rotateSpeed={-0.5} />
     </>
   );
 };
@@ -44,6 +42,12 @@ const Panorama = () => {
       <Canvas camera={{ position: new Vector3(0, 0, 0.1) }}>
         <pointLight position={[10, 10, 10]} />
         <PanoramaView textures={textures} />
+        <OrbitControls
+          enableZoom={false}
+          enablePan={false}
+          zoomToCursor={true}
+          rotateSpeed={-0.5}
+        />
       </Canvas>
     </div>
   );
