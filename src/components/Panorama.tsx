@@ -1,68 +1,13 @@
-import { Canvas, useLoader, useThree } from "@react-three/fiber";
-import { PerspectiveCamera, TextureLoader, Vector3 } from "three";
-import { useEffect, useState } from "react";
+import { Canvas, useLoader } from "@react-three/fiber";
+import { TextureLoader, Vector3 } from "three";
+import { useState } from "react";
 import { OrbitControls } from "@react-three/drei";
 import Hotspot from "./Hotspot";
 
 const PanoramaView = ({ textures }: { textures: string[] }) => {
   const [currentTextureIndex, setCurrentTextureIndex] = useState(0);
-  const { camera } = useThree();
 
   const texture = useLoader(TextureLoader, textures[currentTextureIndex]);
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    let touchStartDistance = 0;
-
-    const getTouchDistance = (touches: TouchList) => {
-      if (touches.length < 2) return 0;
-      const dx = touches[0].clientX - touches[1].clientX;
-      const dy = touches[0].clientY - touches[1].clientY;
-      return Math.sqrt(dx * dx + dy * dy);
-    };
-
-    window.addEventListener(
-      "wheel",
-      (event) => {
-        if (!(camera instanceof PerspectiveCamera)) return;
-
-        camera.fov = Math.max(
-          30,
-          Math.min(90, camera.fov + event.deltaY * 0.05),
-        );
-
-        camera.updateProjectionMatrix();
-      },
-      { signal: controller.signal },
-    );
-
-    window.addEventListener(
-      "touchstart",
-      (event) => {
-        if (event.touches.length < 2) return;
-        touchStartDistance = getTouchDistance(event.touches);
-      },
-      { signal: controller.signal },
-    );
-
-    window.addEventListener(
-      "touchmove",
-      (event) => {
-        if (event.touches.length < 2 || !(camera instanceof PerspectiveCamera))
-          return;
-
-        const newDistance = getTouchDistance(event.touches);
-        const zoomFactor = (touchStartDistance - newDistance) * 0.05;
-        camera.fov = Math.max(30, Math.min(90, camera.fov + zoomFactor));
-        camera.updateProjectionMatrix();
-        touchStartDistance = newDistance;
-      },
-      { signal: controller.signal },
-    );
-
-    return () => controller.abort();
-  }, [camera]);
 
   const changeTexture = (index: number) => {
     setCurrentTextureIndex(index);
@@ -79,7 +24,7 @@ const PanoramaView = ({ textures }: { textures: string[] }) => {
       <Hotspot position={[-300, 50, -200]} onClick={() => changeTexture(2)} />
       <Hotspot position={[100, -100, 60]} onClick={() => changeTexture(0)} />
 
-      <OrbitControls enableZoom={true} enablePan={false} rotateSpeed={-0.5} />
+      <OrbitControls enableZoom={false} enablePan={false} rotateSpeed={-0.5} />
     </>
   );
 };
